@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Sistema APO</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo h1 {
+      font-size: 26px;
+      color: #003087;
+      margin-bottom: 4px;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 6px;
+      margin-top: 18px;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+
+    input[type="email"]:focus {
+      outline: none;
+      border-color: #003087;
+      box-shadow: 0 0 0 3px rgba(0,48,135,0.1);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #888;
+      margin-top: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 24px;
+      border: none;
+      background-color: #003087;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover { background-color: #00206b; }
+    button:disabled { background-color: #aaa; cursor: not-allowed; }
+
+    .mensagem {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+    }
+
+    .mensagem.sucesso { background-color: #e8f5e9; color: #2e7d32; display: block; }
+    .mensagem.erro    { background-color: #fdecea; color: #c62828; display: block; }
+
+    .cadastro-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .cadastro-link a {
+      color: #003087;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .cadastro-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>Sistema APO</h1>
+      <p>Universidade Presbiteriana Mackenzie</p>
+    </div>
+
+    <form id="formLogin">
+      <label for="email">Email Mackenzista</label>
+      <input type="email" id="email" placeholder="seu.nome@mackenzista.br" required>
+      <p class="hint">Use seu email institucional (@mackenzista.br)</p>
+
+      <button type="submit" id="btnLogin">Entrar</button>
+    </form>
+
+    <div id="mensagem" class="mensagem"></div>
+
+    <div class="cadastro-link">
+      Ainda não tem cadastro? <a href="/cadastro-aluno.html">Cadastre-se aqui</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("formLogin");
+    const mensagem = document.getElementById("mensagem");
+    const btnLogin = document.getElementById("btnLogin");
+
+    // If already logged in, redirect to APO page
+    if (localStorage.getItem("alunoLogado")) {
+      window.location.href = "/submeter-apo.html";
+    }
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      btnLogin.disabled = true;
+      mensagem.className = "mensagem";
+      mensagem.textContent = "";
+
+      const email = document.getElementById("email").value.trim();
+
+      try {
+        const response = await fetch("/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem("alunoLogado", JSON.stringify(data));
+          mensagem.textContent = "Login realizado! Redirecionando...";
+          mensagem.className = "mensagem sucesso";
+          setTimeout(() => { window.location.href = "/submeter-apo.html"; }, 800);
+        } else {
+          mensagem.textContent = typeof data === "string" ? data : "Email ou senha inválidos.";
+          mensagem.className = "mensagem erro";
+          btnLogin.disabled = false;
+        }
+      } catch (err) {
+        mensagem.textContent = "Erro de conexão com o servidor.";
+        mensagem.className = "mensagem erro";
+        btnLogin.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
