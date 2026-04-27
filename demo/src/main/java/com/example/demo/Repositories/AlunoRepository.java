@@ -5,5 +5,5 @@ import com.example.demo.Entidades.Aluno;
 import java.util.Optional;
 
 public interface AlunoRepository extends JpaRepository<Aluno, Long> {
-    Optional<Aluno> findByEmail(String email);
+    Optional<Aluno> findByEmailIgnoreCase(String email);
 }

@@ -30,7 +30,7 @@ public class LoginController {
                     .body(Map.of("erro", "Utilize seu email mackenzista para acessar o sistema"));
         }
 
-        return alunoRepository.findByEmail(email.trim())
+        return alunoRepository.findByEmailIgnoreCase(emailLower)
                 .map(aluno -> ResponseEntity.ok((Object) aluno))
                 .orElse(ResponseEntity.status(404)
                         .body(Map.of("erro", "Aluno não encontrado. Verifique seu email ou solicite o cadastro.")));
