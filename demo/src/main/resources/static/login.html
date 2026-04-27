@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Sistema APO Mackenzie</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: #8B0000;
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header .logo-text {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    header .subtitle {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .card {
+      background: white;
+      padding: 40px 36px;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .card h2 {
+      text-align: center;
+      color: #8B0000;
+      margin-bottom: 8px;
+      font-size: 22px;
+    }
+
+    .card p.descricao {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+
+    input[type="email"]:focus {
+      outline: none;
+      border-color: #8B0000;
+      box-shadow: 0 0 0 2px rgba(139,0,0,0.12);
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      margin-top: 22px;
+      padding: 13px;
+      background-color: #8B0000;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #6b0000;
+    }
+
+    button[type="submit"]:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    .mensagem {
+      margin-top: 18px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+
+    .mensagem.erro {
+      background-color: #fde8e8;
+      color: #c0392b;
+      border: 1px solid #f5c6c6;
+      display: block;
+    }
+
+    .mensagem.sucesso {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+      display: block;
+    }
+
+    .link-cadastro {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .link-cadastro a {
+      color: #8B0000;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .link-cadastro a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="logo-text">MACKENZIE</div>
+      <div class="subtitle">Sistema de Gestão APO</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Acesso do Aluno</h2>
+      <p class="descricao">Use seu email mackenzista para entrar no sistema e submeter sua APO.</p>
+
+      <form id="formLogin">
+        <label for="email">Email Mackenzista</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="seuemail@mackenzista.com.br"
+          required
+          autofocus
+        >
+
+        <button type="submit" id="btnEntrar">Entrar</button>
+      </form>
+
+      <div id="mensagem" class="mensagem"></div>
+
+      <div class="link-cadastro">
+        Ainda não tem cadastro? <a href="/cadastro-aluno.html">Solicite o cadastro</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Universidade Presbiteriana Mackenzie &mdash; Sistema APO
+  </footer>
+
+  <script>
+    // Se já está logado, redireciona
+    const alunoLogado = localStorage.getItem('alunoLogado');
+    if (alunoLogado) {
+      window.location.href = '/submeter-apo.html';
+    }
+
+    const form = document.getElementById('formLogin');
+    const mensagemEl = document.getElementById('mensagem');
+    const btnEntrar = document.getElementById('btnEntrar');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+
+      mensagemEl.className = 'mensagem';
+      mensagemEl.textContent = '';
+      btnEntrar.disabled = true;
+      btnEntrar.textContent = 'Entrando...';
+
+      try {
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('alunoLogado', JSON.stringify(data));
+          mensagemEl.textContent = 'Login realizado! Redirecionando...';
+          mensagemEl.className = 'mensagem sucesso';
+          setTimeout(() => window.location.href = '/submeter-apo.html', 800);
+        } else {
+          mensagemEl.textContent = data.erro || 'Erro ao realizar login.';
+          mensagemEl.className = 'mensagem erro';
+        }
+      } catch (err) {
+        mensagemEl.textContent = 'Erro de conexão com o servidor.';
+        mensagemEl.className = 'mensagem erro';
+      } finally {
+        btnEntrar.disabled = false;
+        btnEntrar.textContent = 'Entrar';
+      }
+    });
+  </script>
+</body>
+</html>
