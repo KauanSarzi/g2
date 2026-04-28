@@ -225,19 +225,20 @@
           body: JSON.stringify({ email })
         });
 
-        const data = await response.json();
-
         if (response.ok) {
+          const data = await response.json();
           localStorage.setItem('alunoLogado', JSON.stringify(data));
           mensagemEl.textContent = 'Login realizado! Redirecionando...';
           mensagemEl.className = 'mensagem sucesso';
           setTimeout(() => window.location.href = '/submeter-apo.html', 800);
         } else {
-          mensagemEl.textContent = data.erro || 'Erro ao realizar login.';
+          let msg = 'Erro ao realizar login. (HTTP ' + response.status + ')';
+          try { const err = await response.json(); msg = err.erro || msg; } catch (_) {}
+          mensagemEl.textContent = msg;
           mensagemEl.className = 'mensagem erro';
         }
       } catch (err) {
-        mensagemEl.textContent = 'Erro de conexão com o servidor.';
+        mensagemEl.textContent = 'Não foi possível conectar ao servidor. Verifique se a aplicação está rodando na porta 8080.';
         mensagemEl.className = 'mensagem erro';
       } finally {
         btnEntrar.disabled = false;

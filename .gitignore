@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # Maven build output
 target/
+
+# H2 database files
+data/
