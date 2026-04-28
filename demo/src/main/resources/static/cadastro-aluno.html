@@ -231,11 +231,13 @@
           mensagemEl.className = 'mensagem sucesso';
           form.reset();
         } else {
-          mensagemEl.textContent = 'Erro ao cadastrar aluno. Tente novamente.';
+          let msg = 'Erro ao cadastrar aluno. (HTTP ' + response.status + ')';
+          try { const err = await response.json(); msg = err.message || err.erro || msg; } catch (_) {}
+          mensagemEl.textContent = msg;
           mensagemEl.className = 'mensagem erro';
         }
       } catch (error) {
-        mensagemEl.textContent = 'Erro de conexão com o servidor.';
+        mensagemEl.textContent = 'Não foi possível conectar ao servidor. Verifique se a aplicação está rodando na porta 8080.';
         mensagemEl.className = 'mensagem erro';
       } finally {
         btnCadastrar.disabled = false;
