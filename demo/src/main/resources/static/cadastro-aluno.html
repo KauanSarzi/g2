@@ -184,7 +184,7 @@
       <div id="mensagem" class="mensagem"></div>
 
       <div class="link-login">
-        Já tem cadastro? <a href="/login.html">Fazer login</a>
+        Já tem cadastro? <a href="./login.html">Fazer login</a>
       </div>
     </div>
   </main>
@@ -192,6 +192,19 @@
   <footer>&copy; 2025 Universidade Presbiteriana Mackenzie &mdash; Sistema APO</footer>
 
   <script>
+    function getApiBaseUrl() {
+      const customBaseUrl = localStorage.getItem('apiBaseUrl');
+      if (customBaseUrl) return customBaseUrl.replace(/\/$/, '');
+
+      const isJetBrainsPreview = window.location.port === '63342';
+      const isFileProtocol = window.location.protocol === 'file:';
+      return (isJetBrainsPreview || isFileProtocol)
+        ? 'http://localhost:8080'
+        : '';
+    }
+
+    const apiBaseUrl = getApiBaseUrl();
+
     const form = document.getElementById('formAluno');
     const mensagemEl = document.getElementById('mensagem');
     const btnCadastrar = document.getElementById('btnCadastrar');
@@ -220,7 +233,7 @@
       mensagemEl.textContent = '';
 
       try {
-        const response = await fetch('/alunos', {
+        const response = await fetch(`${apiBaseUrl}/alunos`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(aluno)
