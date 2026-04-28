@@ -304,10 +304,23 @@
   <footer>&copy; 2025 Universidade Presbiteriana Mackenzie &mdash; Sistema APO</footer>
 
   <script>
+    function getApiBaseUrl() {
+      const customBaseUrl = localStorage.getItem('apiBaseUrl');
+      if (customBaseUrl) return customBaseUrl.replace(/\/$/, '');
+
+      const isJetBrainsPreview = window.location.port === '63342';
+      const isFileProtocol = window.location.protocol === 'file:';
+      return (isJetBrainsPreview || isFileProtocol)
+        ? 'http://localhost:8080'
+        : '';
+    }
+
+    const apiBaseUrl = getApiBaseUrl();
+
     // Verifica login
     const alunoData = localStorage.getItem('alunoLogado');
     if (!alunoData) {
-      window.location.href = '/login.html';
+      window.location.href = './login.html';
       throw new Error('Não autenticado');
     }
     const aluno = JSON.parse(alunoData);
@@ -324,7 +337,7 @@
 
     function logout() {
       localStorage.removeItem('alunoLogado');
-      window.location.href = '/login.html';
+      window.location.href = './login.html';
     }
 
     function adicionarItem() {
@@ -399,7 +412,7 @@
       limparMensagem();
 
       try {
-        const response = await fetch(`/alunos/${aluno.idPessoa}/submeter-apo`, {
+        const response = await fetch(`${apiBaseUrl}/alunos/${aluno.idPessoa}/submeter-apo`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ itens })
@@ -448,7 +461,7 @@
     async function carregarHistorico() {
       const container = document.getElementById('historico');
       try {
-        const response = await fetch(`/alunos/${aluno.idPessoa}/solicitacoes`);
+        const response = await fetch(`${apiBaseUrl}/alunos/${aluno.idPessoa}/solicitacoes`);
         if (!response.ok) throw new Error('Falha ao carregar histórico');
         const solicitacoes = await response.json();
 
